@@ -1,27 +1,40 @@
 package pers.qiyanwang.snake;
 
 import javax.swing.*;
+import java.awt.*;
 
-public class SnakeApp {
+public class SnakeApp implements Runnable {
+    
+    Grid grid;
+    GameView gameView;
+    GameController gameController;
 
-    public void init() {
-        // your code here: 初始化Grid
+    public void run() {
 
-        //Create game window
+        grid = new Grid(Settings.DEFAULT_GRID_WIDTH / Settings.DEFAULT_NODE_SIZE,
+                Settings.DEFAULT_GRID_HEIGHT / Settings.DEFAULT_NODE_SIZE);
+
         JFrame window = new JFrame("Retro Snake");
-        JLabel label = new JLabel("Retro Snake");
-        window.getContentPane().add(label);
-
-        // your code here: 初始化GameView，并放到window中
+        Container contentPane = window.getContentPane();
+        gameView = new GameView(grid);
+        gameView.init();
+        gameView.getCanvas().setPreferredSize(new Dimension(Settings.DEFAULT_GRID_WIDTH, Settings.DEFAULT_GRID_HEIGHT));
+        contentPane.add(gameView.getCanvas(), BorderLayout.CENTER);
 
         window.pack();
         window.setResizable(false);
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         window.setVisible(true);
-    }
 
+        gameController = new GameController(grid, gameView);
+        window.addKeyListener(gameController);
+
+        new Thread(gameController).start();
+
+    }
+    
     public static void main(String[] args) {
-        SnakeApp snakeApp = new SnakeApp();
-        snakeApp.init();
+
+        SwingUtilities.invokeLater(new SnakeApp());
     }
 }

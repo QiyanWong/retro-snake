@@ -1,41 +1,52 @@
 package pers.qiyanwang.snake;
 
+import java.util.Arrays;
+import java.util.Random;
+
 public class Grid {
 
     public final boolean status[][];
     private final int width;
     private final int height;
-
+    long time;
+    long timeInterval = 200;
     private Snake snake;
     private Node food;
 
-    // initate direction as LEFT
+    // 初始方向设置为向左
     private Direction snakeDirection = Direction.LEFT;
-
+    
     public Grid(int width, int height) {
 
         this.width = width;
         this.height = height;
         status = new boolean[width][height];
+        time = System.currentTimeMillis();
+        init();
+    }
 
-        initSnake();
-        createFood();
+    public void init() {
+        for (int i = 0; i < width; ++i) {
+            Arrays.fill(status[i], false);
+        }
+        snakeDirection = Direction.LEFT;
+        snake = initSnake();
+        food = createFood();
     }
 
     /**
-     * initate snake on grid
+     * 初始化棋盘上的贪吃蛇
      * @return
      */
     private Snake initSnake() {
         snake = new Snake();
-        int y = height / 2;
 
-        for(int i = 0; i < width / 3; i++){
-            //set snake's body
-            Node newNode = new Node(width / 2 + i,y);
-            //update grid status
-            snake.getBody().addLast(newNode);
-            this.occupy(newNode);
+        int initialSnakeBodyLength = width / 3;
+        for (int i = initialSnakeBodyLength - 1; i >= 0; --i) {
+            int x = width / 2 + i;
+            int y = height / 2;
+            snake.getBody().addFirst(new Node(x, y));
+            status[x][y] = true;
         }
 
         return snake;
@@ -46,14 +57,15 @@ public class Grid {
      * @return
      */
     public Node createFood() {
+        int x, y;
 
-        int x = 0, y = 0;
-        x += (int)(Math.random() * width);
-        y += (int)(Math.random() * height);
+        do {
+            Random r = new Random();
+            x = r.nextInt(width);
+            y = r.nextInt(height);
+        } while (status[x][y]);
+
         food = new Node(x, y);
-        if(snake.getBody().contains(food)){
-                return createFood();
-            }
         return food;
     }
 
@@ -66,37 +78,26 @@ public class Grid {
         Node snakeTail = snake.move(snakeDirection);
         Node snakeHead = snake.getHead();
 
-        if(isVaildHead(snakeHead)){
-            if(isFood(snakeHead)){
-                snake.getBody().addLast(snakeTail);
+        if (validPosition(snakeHead)) {
+            if (isFood(snakeHead)) {
+                snake.addTail(snakeTail);
                 createFood();
-                this.occupy(snakeHead);
-                this.occupy(snakeTail);
-                this.occupy(food);
+            } else {
+                dispose(snakeTail);
             }
-            else {
-                this.occupy(snakeHead);
-                this.dispose(snakeTail);
-            }
+            occupy(snakeHead);
             return true;
         }
+        
         return false;
     }
 
-    private boolean isVaildHead(Node snakeHead){
-        int x = snakeHead.getX();
-        int y = snakeHead.getY();
-        //case1: out of boundary
-        if(!this.validPosition(snakeHead)){
-            return false;
-        }
-        //case2: overlap itself
-        snake.getBody().removeFirst();
-        if(snake.getBody().contains(new Node(x,y))) return false;
-        snake.getBody().addFirst(new Node(x,y));
-        return true;
-    }
     public void changeDirection(Direction newDirection) {
+            long temp = time;
+            time = System.currentTimeMillis();
+            if(time - temp < timeInterval){
+                return;
+            }
         if (snakeDirection.compatibleWith(newDirection)) {
             snakeDirection = newDirection;
         }
@@ -120,7 +121,7 @@ public class Grid {
         int x = area.getX(), y = area.getY();
         return x == food.getX() && y == food.getY();
     }
-
+    
     public Node getFood() {
         return food;
     }

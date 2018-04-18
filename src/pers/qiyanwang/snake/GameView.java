@@ -2,8 +2,6 @@ package pers.qiyanwang.snake;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.LinkedList;
-import java.util.List;
 
 public class GameView {
 
@@ -25,11 +23,15 @@ public class GameView {
         };
     }
 
+    public void showGameOverMessage() {
+        JOptionPane.showMessageDialog(null, "游戏结束", "游戏结束", JOptionPane.INFORMATION_MESSAGE);
+    }
+
     /**
      * 渲染整个游戏界面
      */
     public void draw() {
-        this.canvas.repaint();
+        canvas.repaint();
     }
 
     /**
@@ -38,9 +40,9 @@ public class GameView {
      * @param snake
      */
     public void drawSnake(Graphics graphics, Snake snake) {
-        // your code here
-        for(Node bodynode : snake.getBody()) {
-            drawSquare(graphics,bodynode,Settings.DEFAULT_SNAKE_COLOR);
+        java.util.List<Node> body = snake.getBody();
+        for (Node squareArea : body) {
+            drawSquare(graphics, squareArea, Settings.DEFAULT_SNAKE_COLOR);
         }
     }
 
@@ -50,22 +52,17 @@ public class GameView {
      * @param squareArea
      */
     public void drawFood(Graphics graphics, Node squareArea) {
-        // your code here
-        drawCircle(graphics,squareArea,Settings.DEFAULT_FOOD_COLOR);
-
+        drawCircle(graphics, squareArea, Settings.DEFAULT_FOOD_COLOR);
     }
 
     /**
      * 渲染棋盘背景
-     *
      * @param graphics
      */
     public void drawGridBackground(Graphics graphics) {
         graphics.setColor(Settings.DEFAULT_BACKGROUND_COLOR);
-//        int size = Settings.DEFAULT_GRID_WIDTH * Settings.DEFAULT_GRID_HEIGHT;
-        graphics.fillRect(0, 0, Settings.DEFAULT_GRID_WIDTH, Settings.DEFAULT_GRID_HEIGHT);
-
-        // your code here
+        graphics.fillRect(0, 0, grid.getWidth() * Settings.DEFAULT_NODE_SIZE,
+                grid.getHeight() * Settings.DEFAULT_NODE_SIZE);
     }
 
 
@@ -96,4 +93,5 @@ public class GameView {
     public JPanel getCanvas() {
         return canvas;
     }
+    
 }
