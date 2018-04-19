@@ -1,27 +1,28 @@
 package pers.qiyanwang.snake;
 
-import javax.swing.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
-public class GameController implements Runnable, KeyListener  {
+public class GameController implements KeyListener, Runnable {
     private final Grid grid;
     private final GameView gameView;
-
-    boolean running;
-    boolean suspend;
+    private boolean running;
 
     public GameController(Grid grid, GameView gameView) {
-        this.grid = grid;
         this.gameView = gameView;
-        this.running = true;
-        this.suspend = false;
+        this.grid = grid;
+        running = true;
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+        // TODO Auto-generated method stub
+
     }
 
     @Override
     public void keyPressed(KeyEvent e) {
         int keyCode = e.getKeyCode();
-
         switch (keyCode) {
             case KeyEvent.VK_UP:
                 grid.changeDirection(Direction.UP);
@@ -36,53 +37,54 @@ public class GameController implements Runnable, KeyListener  {
                 grid.changeDirection(Direction.RIGHT);
                 break;
             case KeyEvent.VK_SPACE:
-                if(running) {
-                     running = false;
-                    }
-                else {
-                    running = true;
-                    run();
-                }
+                this.space();
                 break;
             case KeyEvent.VK_ENTER:
-                if(running){
-                    running = true;
-                    grid.init();
-                    run();
-                }
+                this.enter();
+                break;
             default:
         }
     }
 
-    /**
-     * 按一定速率自动移动贪吃蛇
-     */
-    public void run() {
+    @Override
+    public void keyReleased(KeyEvent e) {
+        // TODO Auto-generated method stub
 
+
+    }
+
+    @Override
+    public void run() {
         while (running) {
             try {
                 Thread.sleep(200);
-                if(!grid.nextRound()){
-                    break;
-                }
-                else  gameView.draw();
             } catch (InterruptedException e) {
                 break;
             }
+            if (grid.nextRound()) {
+                gameView.draw();
 
+            } else {
+                gameView.showGameOverMessage();
+                running = false;
+            }
         }
-//        gameView.showGameOverMessage();
-        running = false;
-
+    }
+    public void enter() {
+        if (running == false) {
+            grid.init();
+            running = true;
+            new Thread(this).start();
+        }
     }
 
-    @Override
-    public void keyReleased(KeyEvent e) {
-
+    public void space() {
+        if (running) {
+            running = false;
+        } else {
+            running = true;
+            new Thread(this).start();
+        }
     }
 
-    @Override
-    public void keyTyped(KeyEvent e) {
-
-    }
 }
